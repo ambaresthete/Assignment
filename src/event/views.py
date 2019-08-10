@@ -44,6 +44,8 @@ def register_event(request,pk, format=None):
     event = Event.objects.get(pk=pk)
     other_events = Event.objects.filter(schedule=event.schedule, registered_users=request.user).select_related(
         'created_by').prefetch_related('invited_users', 'registered_users').exists()
+    if event.registered_users.all().count() == event.no_of_attendees:
+      return Response("Attendees limit reached") 
     if not other_events:
       event.registered_users.add(request.user)
     else:
